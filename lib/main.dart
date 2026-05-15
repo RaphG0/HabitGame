@@ -5,10 +5,14 @@ import 'package:apps/Pages/stats.dart';
 import 'package:apps/module/habit.dart';
 import 'package:flutter/material.dart';
 import 'Pages/Home.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
 
   List<Habit> habits = [];
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('appBox');
   runApp(MaterialApp(
     initialRoute: '/',
     routes : {

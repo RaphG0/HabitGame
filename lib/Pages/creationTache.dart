@@ -20,7 +20,8 @@ class _CreationtacheState extends State<Creationtache> {
   String? completeion_c;
   String? nom;
   Cat? cat;
-  List <String> debut = ["Aujourd'hui", "Choisir un jour"];
+  List <String> debut1 = ["Aujourd'hui", "Choisir un jour"];
+  List <String> debut2 = ["Demain", "Choisir un jour"];
   List<String> completion = ["Pour le", "Avant le"];
   DateTime? datedebuttache;
   DateTime? limit;
@@ -58,7 +59,7 @@ class _CreationtacheState extends State<Creationtache> {
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: completeion_c,
-                    hint: Text("Choix complétion"),
+                    hint: Text("A faire"),
                     isExpanded: true,
                     menuMaxHeight: 200,
                     items: completion.map((option) {
@@ -77,7 +78,15 @@ class _CreationtacheState extends State<Creationtache> {
               ),
             ),
           ),
-          Container(
+          if (completeion_c == "Pour le")...[
+            SizedBox(height: 15),
+            Text("Choisir un jour",
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold
+            ),
+            ),
+            Container(
             width: 300,
             height: 55,
             padding: EdgeInsets.symmetric(horizontal: 12),
@@ -94,7 +103,7 @@ class _CreationtacheState extends State<Creationtache> {
                     hint: Text("Date"),
                     isExpanded: true,
                     menuMaxHeight: 200,
-                    items: debut.map((option) {
+                    items: debut1.map((option) {
                       return DropdownMenuItem(
                         value: option,
                         child: Text(option),
@@ -107,12 +116,7 @@ class _CreationtacheState extends State<Creationtache> {
 
                       if (date_debut == "Aujourd'hui") {
                         setState(() {
-                          if (completeion_c == "Pour le") {
                             datedebuttache = DateTime.now();
-                          }else if (completeion_c == "Avant le"){
-                              limit = DateTime.now();
-                          }
-
                         });
                       }
                       else if (date_debut == "Choisir un jour") {
@@ -122,20 +126,11 @@ class _CreationtacheState extends State<Creationtache> {
                           firstDate: DateTime(2020),
                           lastDate: DateTime(2100),
                         );
-                        if (completeion_c == "Pour le") {
                           if (date != null) {
                             setState(() {
                               datedebuttache = date;
                             });
                           }
-                        }
-                        if (completeion_c == "Avant le") {
-                          if (date != null) {
-                            setState(() {
-                              limit = date;
-                            });
-                          }
-                        }
                       }
                     },
                   ),
@@ -143,6 +138,70 @@ class _CreationtacheState extends State<Creationtache> {
               ),
             ),
           ),
+            SizedBox(height: 15),
+          ],
+          if (completeion_c == "Avant le")...[
+            SizedBox(height: 15),
+            Text("Choisir un jour",
+              style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold
+              ),
+            ),
+            Container(
+              width: 300,
+              height: 55,
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 2),
+                child: Center(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: date_debut,
+                      hint: Text("Date"),
+                      isExpanded: true,
+                      menuMaxHeight: 200,
+                      items: debut2.map((option) {
+                        return DropdownMenuItem(
+                          value: option,
+                          child: Text(option),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) async {
+                        setState(() {
+                          date_debut = newValue;
+                        });
+
+                        if (date_debut == "Demain") {
+                          setState(() {
+                              limit = DateTime.now().add(const Duration(days: 1));
+                          });
+                        }
+                        else if (date_debut == "Choisir un jour") {
+                          final DateTime? date = await showDatePicker(
+                            context: context,
+                            initialDate: DateTime.now(),
+                            firstDate: DateTime(2020),
+                            lastDate: DateTime(2100),
+                          );
+                            if (date != null) {
+                              setState(() {
+                                limit = date;
+                              });
+                            }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 15),
+          ],
           ElevatedButton(
             onPressed: (){
               nom =nomcontroller.text;

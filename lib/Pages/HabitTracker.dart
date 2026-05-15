@@ -8,6 +8,7 @@ import 'package:apps/Pages/Objectifs.dart';
 import 'package:confetti/confetti.dart';
 import 'dart:math';
 import 'package:roundcheckbox/roundcheckbox.dart';
+import 'package:apps/Pages/storage.dart';
 
 class Tracker extends StatefulWidget {
   final List habits;
@@ -69,13 +70,9 @@ class _TrackerState extends State<Tracker> {
   }
 
   String formatDate(DateTime date) {
-    String format = "";
-    if (date.day < 10){
-      format = "${date.year}-0${date.month}-0${date.day}";
-    }else{
-      format = "${date.year}-0${date.month}-${date.day}";
-    }
-    return format;
+    return "${date.year}-"
+        "${date.month.toString().padLeft(2, '0')}-"
+        "${date.day.toString().padLeft(2, '0')}";
   }
 
   DateTime getStartOfWeek(DateTime date) {
@@ -175,6 +172,10 @@ class _TrackerState extends State<Tracker> {
       return habit.jours!.contains(selectedDate.weekday);
     }).toList();
 
+    for (var habit in habitsForSelectedDay) {
+      habit.weeksucces = countWeekSuccess(habit, selectedDate);
+    }
+
     return ListView.builder(
       key: ValueKey(selectedDate), // 🔥 TRÈS IMPORTANT
       itemCount: habitsForSelectedDay.length,
@@ -270,9 +271,11 @@ class _TrackerState extends State<Tracker> {
                         checkedColor: Colors.blue,
                         uncheckedColor: Colors.grey[300],
                         onTap: (bool? newValue){
+
                           setState(() {
                             if (newValue == true && isChecked == false) {
                               habitsForSelectedDay[index].nbr_jours_reussis += 1;
+
                             } else if (newValue == false && isChecked == true) {
                               habitsForSelectedDay[index].nbr_jours_reussis -= 1;
                             }
@@ -293,6 +296,7 @@ class _TrackerState extends State<Tracker> {
                           if (achievment.contains(habit.nbr_jours_reussis)) {
                             showAchievementPopup(habit.nbr_jours_reussis);
                           }
+
                           if (habit.modeMesure == "Nbr/semaine") {
 
                             int count = countWeekSuccess(habit, selectedDate);
@@ -305,8 +309,10 @@ class _TrackerState extends State<Tracker> {
                               print(count);
                               showWeeklySuccessPopup();
                               habit.semainesValidees.add(weekKey);
+
                             }
                           }
+                          widget.onHabitsChanged(widget.habits);
                         }),
                     Spacer(),
                     Text('${habitsForSelectedDay[index].nom}',
@@ -323,29 +329,57 @@ class _TrackerState extends State<Tracker> {
 
                   ],
                 ),
+                  if (habitsForSelectedDay[index].modeMesure == 'Nbr/semaine')
+                    Text("${habitsForSelectedDay[index].weeksucces}/${habitsForSelectedDay[index].frequency}"),
                   if (habitsForSelectedDay[index].curseur == true)...[
                     if (habitsForSelectedDay[index].critere_completion == 'Pourcentage')...[
                       Column(
                         children: [
-                          Text("${habitsForSelectedDay[index].nom_critere} : ${value_cursor.round()}%"),
+                          //Text("${habitsForSelectedDay[index].nom_critere} : ${value_cursor.round()}%"),
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              trackHeight: 6,
+                              activeTrackColor: Colors.blue,
+                              inactiveTrackColor: Colors.blue.shade100,
+                              thumbColor: Colors.blue,
+                              overlayColor: Colors.blue.withOpacity(0.15),
 
-                          Slider(
-                            value: value_cursor,
-                            min: 0,
-                            max: 100,
-                            onChanged: (double v) {
-                              setState(() {
-                                habitsForSelectedDay[index].valeurs_curseurs[todayKey] = v;
-                              });
-                            },
-                            activeColor: Colors.cyan,
+                              thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 11,
+                                elevation: 3,
+                              ),
+
+                              overlayShape: const RoundSliderOverlayShape(
+                                overlayRadius: 22,
+                              ),
+
+                              valueIndicatorColor: Colors.blue,
+                              valueIndicatorTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+
+                              showValueIndicator: ShowValueIndicator.always,
+                            ),
+                            child: Slider(
+                              value: value_cursor,
+                              min: 0,
+                              max: 100,
+                              divisions: 100,
+                              label:
+                              '${habitsForSelectedDay[index].nom_critere} : ${value_cursor.round()}%',
+                              onChanged: (double v) {
+                                setState(() {
+                                  habitsForSelectedDay[index].valeurs_curseurs[todayKey] = v;
+                                });
+                              },
+                            ),
                           ),
-
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("${0}"),
-                              Text("${100}"),
+                              Text("0%"),
+                              Text("100%"),
                             ],
                           ),
                         ],
@@ -420,7 +454,7 @@ class _TrackerState extends State<Tracker> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50],
+      backgroundColor: Colors.grey[100],
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final newHabit = await Navigator.push(
@@ -435,6 +469,12 @@ class _TrackerState extends State<Tracker> {
               widget.habits.add(newHabit);
             });
             widget.onHabitsChanged(widget.habits);
+
+            StorageService.saveData(
+              habits: widget.habits.cast<Habit>(),
+              taches: [],
+              goals: [],
+            );
           }
         },
         child: Icon(Icons.add),

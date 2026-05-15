@@ -14,4 +14,20 @@ class Cat {
     this.color
   });
 
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': nom,
+      'color': color,
+      'icon': icone,
+    };
+  }
+
+  factory Cat.fromJson(Map json) {
+    return Cat(
+      nom: json['name'],
+      color: Color(json['color']),
+      icone: IconData(json['icon'], fontFamily: 'MaterialIcons'),
+    );
+  }
 }

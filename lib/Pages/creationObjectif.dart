@@ -15,6 +15,7 @@ class CreationObjectifs extends StatefulWidget {
   final Function(List) onHabitsChanged;
   final List taches;
   final Function(List) onTaskChanged;
+  final Goal? goalToEdit;
 
   const CreationObjectifs({
     super.key,
@@ -22,6 +23,7 @@ class CreationObjectifs extends StatefulWidget {
     required this.onHabitsChanged,
     required this.taches,
     required this.onTaskChanged,
+    this.goalToEdit
   });
 
   @override
@@ -29,6 +31,21 @@ class CreationObjectifs extends StatefulWidget {
 }
 
 class _CreationObjectifsState extends State<CreationObjectifs> {
+
+  void initState() {
+    super.initState();
+
+    if (widget.goalToEdit != null) {
+      final goal = widget.goalToEdit!;
+
+      nameController.text = goal.nom!;
+      date_debut = goal.startDay;
+      date_fin = goal.endDay;
+      associatedHabits = List<Habit>.from(goal.habits ?? []);
+      associatedTasks = List<Tache>.from(goal.taches ?? []);
+    }
+  }
+
   TextEditingController nameController = TextEditingController();
   String? mode_date_debut;
   String? mode_date_fin;
@@ -214,7 +231,7 @@ class _CreationObjectifsState extends State<CreationObjectifs> {
                     final newHabit = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Existantes(habits: widget.habits, onHabitsChanged: widget.onHabitsChanged),
+                        builder: (context) => Existantes(habits: widget.habits, onHabitsChanged: widget.onHabitsChanged, associatedHabits: associatedHabits),
                       ),
                     );
                     setState(() {
@@ -407,16 +424,27 @@ class _CreationObjectifsState extends State<CreationObjectifs> {
           ),
           ElevatedButton(
             onPressed: (){
-              final Goal newGoal = Goal(nom: nameController.text,
-                  isDone: false,
-                  startDay: date_debut,
-                  endDay: date_fin,
-                  habits: associatedHabits,
-                  taches : associatedTasks
-              );
-              Navigator.pop(context, newGoal);
+              if (widget.goalToEdit != null) {
+                final goal = widget.goalToEdit!;
+                goal.nom = nameController.text;
+                goal.startDay = date_debut;
+                goal.endDay = date_fin;
+                goal.habits = associatedHabits;
+                goal.taches = associatedTasks;
+                Navigator.pop(context, goal);
+              }else {
+                final Goal newGoal = Goal(nom: nameController.text,
+                    isDone: false,
+                    startDay: date_debut,
+                    endDay: date_fin,
+                    habits: associatedHabits,
+                    taches: associatedTasks
+                );
+                Navigator.pop(context, newGoal);
+              }
             },
             child: Text('Valider'),),
+          SizedBox(height: 20)
         ],
       ),),
     );

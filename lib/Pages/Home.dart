@@ -7,6 +7,9 @@ import 'package:apps/Pages/Taches_Manager.dart';
 import 'package:apps/Pages/Objectifs.dart';
 import 'package:apps/Pages/HabitTracker.dart';
 import 'package:apps/Pages/Awards.dart';
+import 'package:apps/Pages/storage.dart';
+import 'package:apps/module/Tache.dart';
+import 'package:apps/module/Goal.dart';
 
 
 class Home extends StatefulWidget {
@@ -17,11 +20,37 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+  int _currentIndex = 0;
+  // Liste des pages
+
   List habits = [];
   List taches = [];
   List objectifs = [];
-  int _currentIndex = 0;
-  // Liste des pages
+
+  @override
+  void initState() {
+    super.initState();
+
+    final data = StorageService.loadData();
+
+    habits = (data['habits'] as List)
+        .map((h) => Habit.fromJson(h))
+        .toList();
+    setState(() {});
+
+    taches = (data['taches'] as List)
+        .map((h) => Tache.fromJson(h))
+        .toList();
+    setState(() {});
+
+    objectifs = (data['goals'] as List)
+        .map((h) => Goal.fromJson(h))
+        .toList();
+    setState(() {});
+
+
+  }
 
   @override
   Widget build(BuildContext context) {

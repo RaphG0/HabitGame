@@ -23,5 +23,39 @@ class Goal {
 });
 
 
+
+
+  Map<String, dynamic> toJson() {
+    return {
+      "nom": nom,
+      "startDay": startDay?.toIso8601String(),
+      "endDay": endDay?.toIso8601String(),
+      "habits": habits?.map((h) => h.toJson()).toList(),
+      "taches": taches?.map((t) => t.toJson()).toList(),
+      "isDone": isDone,
+      "isExpanded": isExpanded,
+      "progression": progression,
+    };
+  }
+  factory Goal.fromJson(Map json) {
+    return Goal(
+      nom: json["nom"],
+      startDay: json["startDay"] != null
+          ? DateTime.parse(json["startDay"])
+          : null,
+      endDay: json["endDay"] != null
+          ? DateTime.parse(json["endDay"])
+          : null,
+      habits: (json["habits"] as List?)
+          ?.map((h) => Habit.fromJson(h))
+          .toList(),
+      taches: (json["taches"] as List?)
+          ?.map((t) => Tache.fromJson(t))
+          .toList(),
+      isDone: json["isDone"],
+    )
+      ..isExpanded = json["isExpanded"] ?? false
+      ..progression = (json["progression"] as num?)?.toDouble() ?? 0.0;
+  }
 }
 

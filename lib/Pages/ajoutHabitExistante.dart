@@ -4,11 +4,13 @@ import 'package:apps/module/habit.dart';
 class Existantes extends StatefulWidget {
   final List habits;
   final Function(List) onHabitsChanged;
+  final List associatedHabits;
 
   const Existantes({
     super.key,
     required this.habits,
     required this.onHabitsChanged,
+    required this.associatedHabits
   });
 
   @override
@@ -16,7 +18,21 @@ class Existantes extends StatefulWidget {
 }
 
 class _ExistantesState extends State<Existantes> {
+
+  List<Habit> habitudes_finales = [];
+
   @override
+
+  void initState() {
+  super.initState();
+
+  for (int i = 0; i < widget.habits.length; i++) {
+  if (!widget.associatedHabits.contains(widget.habits[i])) {
+  habitudes_finales.add(widget.habits[i]);
+  }
+  }
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -26,9 +42,10 @@ class _ExistantesState extends State<Existantes> {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
-        itemCount: widget.habits.length,
+        itemCount: habitudes_finales.length,
         itemBuilder: (context, index) {
-          final habit = widget.habits[index];
+
+          final habit = habitudes_finales[index];
 
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
@@ -51,7 +68,7 @@ class _ExistantesState extends State<Existantes> {
                       SizedBox(width: 16),
                       Expanded(
                         child: Text(
-                          habit.nom,
+                          habit.nom!,
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                       ),
